@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Адаптивное обучение{% endblock %}
+
+{% block content %}
+  <section class="auth-card">
+    <h1>Вход</h1>
+    <p class="auth-lead">Войди, чтобы начать обучение и смотреть свои результаты.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+      {% if form.non_field_errors %}
+        <ul class="errorlist">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% for field in form %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      {% endfor %}
+      <button class="hero-cta" type="submit">Войти</button>
+    </form>
+    <p class="auth-switch">Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрироваться</a></p>
+  </section>
+{% endblock %}
