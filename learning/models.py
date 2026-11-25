@@ -141,3 +141,28 @@ class StudentAnswer(models.Model):
             )
         ]
 
+
+class AttemptQuestion(models.Model):
+    attempt = models.ForeignKey(
+        QuizAttempt,
+        on_delete=models.CASCADE,
+        related_name='assigned_questions'
+    )
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.PROTECT
+    )
+    order = models.PositiveSmallIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['attempt', 'question'],
+                name='unique_assigned_question'
+            ),
+            models.UniqueConstraint(
+                fields=['attempt', 'order'],
+                name='unique_question_order_per_attempt'
+            )
+        ]
+

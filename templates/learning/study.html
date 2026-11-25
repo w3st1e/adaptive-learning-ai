@@ -1,11 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}Обучение — Адаптивное обучение{% endblock %}
+{% block title %}Выбор темы — Адаптивное обучение{% endblock %}
 
 {% block content %}
-  <section class="auth-card">
-    <h1>Обучение</h1>
-    <p class="auth-lead">Тест появится на следующем этапе. Сейчас здесь можно убедиться, что страница доступна только после входа.</p>
-    <a class="text-link" href="{% url 'home' %}">На главную</a>
-  </section>
+  <div class="shell topic-page">
+    <h1>Выбери тему</h1>
+    <p class="topic-lead">Тест начнётся по выбранной теме и будет учитывать уверенность в ответе.</p>
+
+    {% if has_topics %}
+      {% for subject in subjects %}
+        {% if subject.topics.all %}
+          <section class="subject-block">
+            <h2>{{ subject.name }}</h2>
+            <ul class="topic-list">
+              {% for topic in subject.topics.all %}
+                <li class="topic-card">
+                  <div>
+                    <p class="topic-name">{{ topic.name }}</p>
+                    {% if topic.description %}
+                      <p class="topic-description">{{ topic.description }}</p>
+                    {% endif %}
+                  </div>
+                  <form method="post" action="{% url 'learning:start_quiz' topic.pk %}">
+                    {% csrf_token %}
+                    <button class="nav-cta" type="submit">Начать тест</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <section class="auth-card topic-empty">
+        <p class="auth-lead">Тем пока нет. Их можно добавить в админке: сначала предмет, затем тема.</p>
+        <a class="text-link" href="{% url 'home' %}">На главную</a>
+      </section>
+    {% endif %}
+  </div>
 {% endblock %}
