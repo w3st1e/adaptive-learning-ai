@@ -17,7 +17,7 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   >
-  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=24">
 </head>
 <body>
   <header class="site-header">
@@ -28,11 +28,19 @@
         {% if user.is_authenticated %}
           <a class="nav-cta" href="{% url 'learning:start' %}">Начать обучение</a>
           <a class="nav-link" href="{% url 'learning:results' %}">Мои результаты</a>
-          <span class="nav-user">{{ user.username }}</span>
-          <form class="logout-form" method="post" action="{% url 'accounts:logout' %}">
-            {% csrf_token %}
-            <button class="nav-link nav-logout" type="submit">Выйти</button>
-          </form>
+          <details class="profile-menu">
+            <summary>
+              <span class="profile-avatar" aria-hidden="true">{{ user.username|slice:":1"|upper }}</span>
+              <span class="profile-name">{{ user.username }}</span>
+              <span class="profile-caret" aria-hidden="true"></span>
+            </summary>
+            <div class="profile-dropdown">
+              <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit">Выйти</button>
+              </form>
+            </div>
+          </details>
         {% else %}
           <a class="nav-link" href="{% url 'accounts:login' %}">Войти</a>
           <a class="nav-cta" href="{% url 'accounts:register' %}">Регистрация</a>

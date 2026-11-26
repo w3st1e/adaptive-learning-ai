@@ -3,9 +3,43 @@
 {% block title %}Мои результаты — Адаптивное обучение{% endblock %}
 
 {% block content %}
-  <section class="auth-card">
+  <div class="shell quiz-page">
     <h1>Мои результаты</h1>
-    <p class="auth-lead">Попыток пока нет. Они появятся здесь после первого теста.</p>
-    <a class="text-link" href="{% url 'home' %}">На главную</a>
-  </section>
+
+    {% if page_obj.object_list %}
+      <ul class="topic-list history-list">
+        {% for attempt in page_obj %}
+          <li class="topic-card history-card">
+            <div>
+              <p class="topic-name">{{ attempt.topic.name }}</p>
+              <p class="topic-description">
+                {% if attempt.completed_at %}
+                  {{ attempt.completed_at|date:"j E Y, H:i" }}
+                {% else %}
+                  Дата не указана
+                {% endif %}
+              </p>
+              <p class="history-score">{{ attempt.correct_count }} из {{ attempt.total_count }} · {{ attempt.percent }}%</p>
+            </div>
+            <a class="nav-cta" href="{% url 'learning:quiz_results' attempt.pk %}?page={{ page_obj.number }}">Подробнее</a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      {% if page_obj.has_other_pages %}
+        <nav class="history-pager" aria-label="Страницы результатов">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+          {% endif %}
+          <span>{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Дальше</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <p class="quiz-lead">Ты ещё не прошёл ни одного теста</p>
+      <a class="hero-cta" href="{% url 'learning:start' %}">Начать обучение</a>
+    {% endif %}
+  </div>
 {% endblock %}

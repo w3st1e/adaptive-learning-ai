@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load learning_extras %}
+
+{% block title %}Тест — Адаптивное обучение{% endblock %}
+
+{% block content %}
+  <div class="shell quiz-page">
+    <p class="quiz-kicker">{{ attempt.topic.subject.name }}</p>
+    <h1>{{ attempt.topic.name }}</h1>
+    <p class="quiz-lead">Ответь на вопросы</p>
+
+    {% if form_errors %}
+      <div class="quiz-errors" role="alert">
+        {% for message in form_errors %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if not submit_url %}
+      <p class="quiz-note">
+        Ответы пока нельзя отправить: маршрут <code>learning:submit_quiz</code> ещё не подключён.
+      </p>
+    {% endif %}
+
+    <form method="post" {% if submit_url %}action="{{ submit_url }}"{% endif %}>
+      {% csrf_token %}
+
+      {% for item in assigned %}
+        {% with question=item.question %}
+          {% with answer_field="answer_"|concat:question.pk confidence_field="confidence_"|concat:question.pk %}
+            <article class="quiz-card">
+              <p class="quiz-number">Вопрос {{ item.order }}</p>
+              <h2>{{ question.text }}</h2>
+              {% with question_error=question_errors|get_item:question.pk %}
+                {% if question_error %}
+                  <p class="quiz-field-error">{{ question_error }}</p>
+                {% endif %}
+              {% endwith %}
+
+              <fieldset>
+                <legend>Вариант ответа</legend>
+                <div class="quiz-options">
+                  {% for option in question.options.all %}
+                    <label class="option-choice">
+                      <input
+                        type="radio"
+                        name="answer_{{ question.pk }}"
+                        value="{{ option.pk }}"
+                        {% if request.POST|get_item:answer_field == option.pk|stringformat:"s" %}checked{% endif %}
+                      >
+                      <span>{{ option.text }}</span>
+                    </label>
+                  {% empty %}
+                    <p class="quiz-field-error">У этого вопроса пока нет вариантов ответа.</p>
+                  {% endfor %}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Насколько ты уверен в ответе?</legend>
+                <p class="confidence-hint">Отметь, насколько ты уверен в ответе. Здесь нет правильного выбора — это поможет подобрать задания и объяснения.</p>
+                <div class="confidence-choices">
+                  <label class="confidence-choice">
+                    <input
+                      type="radio"
+                      name="confidence_{{ question.pk }}"
+                      value="high"
+                      {% if request.POST|get_item:confidence_field == "high" %}checked{% endif %}
+                    >
+                    <span>
+                      <span class="choice-title">Уверен</span>
+                      <span class="choice-note">Понимаю решение</span>
+                    </span>
+                  </label>
+                  <label class="confidence-choice">
+                    <input
+                      type="radio"
+                      name="confidence_{{ question.pk }}"
+                      value="medium"
+                      {% if request.POST|get_item:confidence_field == "medium" %}checked{% endif %}
+                    >
+                    <span>
+                      <span class="choice-title">Сомневаюсь</span>
+                      <span class="choice-note">Не уверен в решении</span>
+                    </span>
+                  </label>
+                  <label class="confidence-choice">
+                    <input
+                      type="radio"
+                      name="confidence_{{ question.pk }}"
+                      value="low"
+                      {% if request.POST|get_item:confidence_field == "low" %}checked{% endif %}
+                    >
+                    <span>
+                      <span class="choice-title">Угадываю</span>
+                      <span class="choice-note">Выбираю почти наугад</span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </article>
+          {% endwith %}
+        {% endwith %}
+      {% empty %}
+        <section class="auth-card topic-empty">
+          <p class="auth-lead">Для этой попытки вопросы ещё не назначены.</p>
+        </section>
+      {% endfor %}
+
+      {% if assigned %}
+        <button class="hero-cta" type="submit" {% if not submit_url %}disabled{% endif %}>
+          Отправить ответы
+        </button>
+      {% endif %}
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Тест {{ test_number }} — Адаптивное обучение{% endblock %}
+
+{% block content %}
+  <div class="shell quiz-page results-page">
+    <a class="results-back-link" href="{% url 'learning:results' %}{% if history_page %}?page={{ history_page }}{% endif %}">← К моим результатам</a>
+    <p class="quiz-kicker">Тест {{ test_number }}</p>
+    <h1>{{ attempt.topic.name }}</h1>
+    <p class="attempt-meta">
+      {{ attempt.user.username }}
+      ·
+      {% if attempt.completed_at %}
+        {{ attempt.completed_at|date:"j E Y, H:i" }}
+      {% else %}
+        время не указано
+      {% endif %}
+    </p>
+
+    <section class="score-card score-layout">
+      <div>
+        <p class="score-percent">{{ percent }}%</p>
+        <p class="score-count">Правильных ответов: {{ correct_count }} из {{ total_count }}</p>
+      </div>
+      {% if previous_result %}
+        <p class="score-before">
+          Предыдущий тест №{{ previous_result.number }}:
+          {{ previous_result.correct }} из {{ previous_result.total }} · {{ previous_result.percent }}%
+        </p>
+      {% endif %}
+    </section>
+
+    {% if skills %}
+      <section class="score-card">
+        <h2>Навыки</h2>
+        <ul class="skill-list">
+          {% for skill in skills %}
+            <li>
+              {{ skill.name }} — {{ skill.correct }} из {{ skill.total }}
+              {% if skill.previous %}
+                · прошлый результат: {{ skill.previous.correct }} из {{ skill.previous.total }}
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% for row in rows %}
+      <article class="quiz-card result-card {% if row.is_correct %}is-correct{% else %}is-wrong{% endif %}">
+        <div class="result-head">
+          <p class="quiz-number">Вопрос {{ row.order }}</p>
+          <p class="result-status">{% if row.is_correct %}Верно{% else %}Неверно{% endif %}</p>
+        </div>
+        <h2>{{ row.question.text }}</h2>
+        <div class="result-answers">
+          <p class="result-line">
+            Твой ответ:
+            <strong class="{% if row.is_correct %}answer-right{% else %}answer-mine{% endif %}">{{ row.selected.text }}</strong>
+          </p>
+          {% if not row.is_correct %}
+            <p class="result-line">
+              Правильный ответ:
+              <strong class="answer-right">{% if row.correct %}{{ row.correct.text }}{% else %}Не указан{% endif %}</strong>
+            </p>
+          {% endif %}
+        </div>
+        <p class="result-line result-confidence"><span>Как ты отвечал:</span><span class="confidence-badge">{{ row.confidence }}</span></p>
+        {% if not row.is_correct %}
+          <button class="explain-error" type="button">Объяснить ошибку</button>
+        {% endif %}
+      </article>
+    {% endfor %}
+
+    <a class="hero-cta results-back" href="{% url 'learning:start' %}">Вернуться к темам</a>
+  </div>
+{% endblock %}

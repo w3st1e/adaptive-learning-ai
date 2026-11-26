@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load learning_extras %}
 
 {% block title %}Выбор темы — Адаптивное обучение{% endblock %}
 
@@ -21,10 +22,16 @@
                       <p class="topic-description">{{ topic.description }}</p>
                     {% endif %}
                   </div>
-                  <form method="post" action="{% url 'learning:start_quiz' topic.pk %}">
-                    {% csrf_token %}
-                    <button class="nav-cta" type="submit">Начать тест</button>
-                  </form>
+                  {% with open_attempt=open_attempts|get_item:topic.pk %}
+                    {% if open_attempt %}
+                      <a class="nav-cta" href="{% url 'learning:quiz_detail' open_attempt.pk %}">Продолжить тест</a>
+                    {% else %}
+                      <form method="post" action="{% url 'learning:start_quiz' topic.pk %}">
+                        {% csrf_token %}
+                        <button class="nav-cta" type="submit">Начать тест</button>
+                      </form>
+                    {% endif %}
+                  {% endwith %}
                 </li>
               {% endfor %}
             </ul>
